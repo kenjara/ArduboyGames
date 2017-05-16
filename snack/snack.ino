@@ -3,8 +3,9 @@
 // make an instance of arduboy used for many functions
 Arduboy arduboy;
 
-struct coords
+class coords
 {
+  public:
   int X = 0;
   int Y = 0; 
 };
@@ -16,11 +17,9 @@ struct player
   int X = 0;
   int Y = 0;
   char dir = 'R';
-
-  Player()
-  {
-    
-  }
+  int Len = 1;
+  static const int MaxLength = 10;
+  Coords *Moves[MaxLength] = {NULL};
 };
 
 typedef struct player Player;
@@ -34,11 +33,77 @@ int maxY = 63;
 int minY = 0;
 
 int score = 0;
+int arrayPosition = 0;
 
 void GenerateFood()
 {
-  foodLocation.X = 0;
-  foodLocation.Y = 0;
+  arduboy.initRandomSeed();
+  foodLocation.X = random(minX, maxX);
+  foodLocation.Y = random(minY, maxY);
+}
+
+void StartGame()
+{
+  p1.X = 1;
+  p1.Y = 1;
+  GenerateFood();
+}
+
+//TODO only log move if location has changed.
+void LogMove()
+{
+  if(p1.Moves[arrayPosition] == NULL)
+  {
+      p1.Moves[arrayPosition] = new Coords();
+    
+  }
+      p1.Moves[arrayPosition]->X = p1.X;
+      p1.Moves[arrayPosition]->Y = p1.Y;
+
+  if(arrayPosition < p1.Len)
+  {
+    arrayPosition += 1;
+    
+  }
+  else
+  {
+    arrayPosition = 0;
+  }
+}
+
+void CollisionDetection()
+{
+  if(p1.X == foodLocation.X && p1.Y == foodLocation.Y)
+  {
+    p1.Len += 1;
+    score += 1;
+    LogMove();
+    GenerateFood();
+  }
+}
+
+void DrawTail()
+{
+  int tailPosition = arrayPosition;
+  for (int i=0; i < p1.Len; i++){
+      if(p1.Moves[tailPosition] != NULL)
+      {
+         arduboy.drawPixel(p1.Moves[tailPosition]->X, p1.Moves[tailPosition]->Y, 1);
+      }
+      else
+      {
+        return;
+      }
+
+      if(tailPosition > 0)
+      {
+        tailPosition -= 1;
+      }
+      else
+      {
+        tailPosition = 0;
+      }
+   } 
 }
 
 // This function runs once in your game.
@@ -51,8 +116,7 @@ void setup() {
   // default 60 and it saves us battery life
   arduboy.setFrameRate(15);
 
-  p1.X = 1;
-  p1.Y = 1;
+ StartGame(); 
 }
 
 
@@ -66,10 +130,7 @@ void loop() {
   // first we clear our screen to black
   arduboy.clear();
 
-  // the next couple of lines will deal with checking if the D-pad buttons
-  // are pressed and move our text accordingly.
-  // We check to make sure that x and y stay within a range that keeps the
-  // text on the screen.
+  CollisionDetection();
 
   if(arduboy.pressed(RIGHT_BUTTON)) {
     p1.dir = 'R';
@@ -117,11 +178,14 @@ void loop() {
   }
 
   arduboy.drawPixel(p1.X, p1.Y, 1);
-  // (positions start at 0, 0) 
-  //arduboy.setCursor(4, 9);
-
-  // then we print to screen what is in the Quotation marks ""
-  //arduboy.print(F("Hello, world!"));
+  arduboy.drawPixel(foodLocation.X, foodLocation.Y, 1);
+  DrawTail();
+  LogMove();
+  
+  arduboy.setCursor(0, 0);  
+  arduboy.print("Score ");
+  arduboy.print(score);
+  
 
   // then we finaly we tell the arduboy to display what we just wrote to the display
   arduboy.display();
