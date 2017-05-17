@@ -26,11 +26,12 @@ typedef struct player Player;
 
 Player p1;
 Coords foodLocation;
+Coords previousPosition;
 
 int maxX = 127;
 int minX = 0;
-int maxY = 63;
-int minY = 0;
+int maxY = 53;
+int minY = 10;
 
 int score = 0;
 int arrayPosition = 0;
@@ -101,9 +102,14 @@ void DrawTail()
       }
       else
       {
-        tailPosition = 0;
+        tailPosition = p1.Len -1;
       }
    } 
+}
+
+void DrawFrame()
+{
+  arduboy.drawRect(minX,minY, maxX, maxY, WHITE);
 }
 
 // This function runs once in your game.
@@ -114,7 +120,7 @@ void setup() {
 
   // here we set the framerate to 15, we do not need to run at
   // default 60 and it saves us battery life
-  arduboy.setFrameRate(15);
+  arduboy.setFrameRate(10);
 
  StartGame(); 
 }
@@ -129,6 +135,8 @@ void loop() {
 
   // first we clear our screen to black
   arduboy.clear();
+
+  DrawFrame();
 
   CollisionDetection();
 
@@ -180,11 +188,21 @@ void loop() {
   arduboy.drawPixel(p1.X, p1.Y, 1);
   arduboy.drawPixel(foodLocation.X, foodLocation.Y, 1);
   DrawTail();
-  LogMove();
+  if(p1.X != previousPosition.X || p1.Y != previousPosition.Y)
+  {
+    previousPosition.X = p1.X;
+    previousPosition.Y = p1.Y;
+    LogMove();
+  }
   
-  arduboy.setCursor(0, 0);  
+  
+  arduboy.setCursor(63, 0);  
   arduboy.print("Score ");
-  arduboy.print(score);
+
+  char scoreBuff[5];
+  sprintf(scoreBuff, "%05d", score);
+  
+  arduboy.print(scoreBuff);
   
 
   // then we finaly we tell the arduboy to display what we just wrote to the display
