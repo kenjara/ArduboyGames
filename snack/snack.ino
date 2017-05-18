@@ -3,6 +3,11 @@
 // make an instance of arduboy used for many functions
 Arduboy arduboy;
 
+int maxX = 127;
+int minX = 0;
+int maxY = 63;
+int minY = 10;
+
 class coords
 {
   public:
@@ -28,11 +33,6 @@ Player p1;
 Coords foodLocation;
 Coords previousPosition;
 
-int maxX = 127;
-int minX = 0;
-int maxY = 53;
-int minY = 10;
-
 int score = 0;
 int arrayPosition = 0;
 
@@ -45,12 +45,11 @@ void GenerateFood()
 
 void StartGame()
 {
-  p1.X = 1;
-  p1.Y = 1;
+  p1.X = maxX / 2;
+  p1.Y = (maxY / 2) + 10;
   GenerateFood();
 }
 
-//TODO only log move if location has changed.
 void LogMove()
 {
   if(p1.Moves[arrayPosition] == NULL)
@@ -113,7 +112,7 @@ void DrawTail()
 
 void DrawFrame()
 {
-  arduboy.drawRect(minX,minY, maxX, maxY, WHITE);
+  arduboy.drawRect(minX,minY, maxX +1, (maxY - minY) +1, WHITE);
 }
 
 // This function runs once in your game.
