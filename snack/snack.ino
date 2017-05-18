@@ -17,7 +17,7 @@ struct player
   int X = 0;
   int Y = 0;
   char dir = 'R';
-  int Len = 1;
+  int Len = 0;
   static const int MaxLength = 10;
   Coords *Moves[MaxLength] = {NULL};
 };
@@ -76,7 +76,11 @@ void CollisionDetection()
 {
   if(p1.X == foodLocation.X && p1.Y == foodLocation.Y)
   {
-    p1.Len += 1;
+    if(p1.Len < p1.MaxLength)
+    {
+      p1.Len += 1;
+    }
+    
     score += 1;
     LogMove();
     GenerateFood();
