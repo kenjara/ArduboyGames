@@ -165,19 +165,31 @@ void loop() {
     DrawFrame();
   
     if(arduboy.pressed(RIGHT_BUTTON)) {
-      p1.dir = 'R';
+      if(p1.dir != 'L')
+      {
+        p1.dir = 'R';
+      }
     }
   
     if(arduboy.pressed(LEFT_BUTTON)) {
-      p1.dir = 'L';
+      if(p1.dir != 'R')
+      {
+        p1.dir = 'L';
+      }
     }
   
     if(arduboy.pressed(UP_BUTTON)) {
-      p1.dir = 'U';
+      if(p1.dir != 'D')
+      {
+        p1.dir = 'U';
+      }
     }
   
     if(arduboy.pressed(DOWN_BUTTON)) {
-      p1.dir = 'D';  
+      if(p1.dir != 'U')
+      {
+        p1.dir = 'D'; 
+      } 
     }
   
     switch(p1.dir)
