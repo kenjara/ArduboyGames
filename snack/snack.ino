@@ -74,6 +74,25 @@ void LogMove()
 
 void CollisionDetection()
 {
+
+  //Check if hit wall
+
+  if(p1.X >= maxX || p1.X <= minX || p1.Y >= maxY || p1.Y <= minY)
+  {
+    gameRunning = false; 
+  }
+
+  //Check if hit tail
+  for (int i=0; i < p1.MaxLength; i++){
+      if(p1.Moves[i] != NULL)
+      {
+        if(p1.Moves[i]->X == p1.X && p1.Moves[i]->Y == p1.Y)
+        {
+          gameRunning = false;
+        }
+      }
+  }
+
   // Check if on food
   if(p1.X == foodLocation.X && p1.Y == foodLocation.Y)
   {
@@ -86,15 +105,6 @@ void CollisionDetection()
     LogMove();
     GenerateFood();
   }
-
-  //Check if hit wall
-
-  if(p1.X >= maxX || p1.X <= minX || p1.Y >= maxY || p1.Y <= minY)
-  {
-    gameRunning = false; 
-  }
-
-  //Check if hit tail
 }
 
 void DrawTail()
@@ -154,8 +164,6 @@ void loop() {
   {
     DrawFrame();
   
-    CollisionDetection();
-  
     if(arduboy.pressed(RIGHT_BUTTON)) {
       p1.dir = 'R';
     }
@@ -200,6 +208,8 @@ void loop() {
       
       break;
     }
+
+    CollisionDetection();
   
     arduboy.drawPixel(p1.X, p1.Y, 1);
     arduboy.drawPixel(foodLocation.X, foodLocation.Y, 1);
@@ -210,8 +220,7 @@ void loop() {
       previousPosition.Y = p1.Y;
       LogMove();
     }
-    DrawTail();
-    
+    DrawTail();    
     
     arduboy.setCursor(63, 0);  
     arduboy.print("Score ");
