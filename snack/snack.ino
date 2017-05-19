@@ -3,27 +3,28 @@
 // make an instance of arduboy used for many functions
 Arduboy arduboy;
 
-int maxX = 127;
-int minX = 0;
-int maxY = 63;
-int minY = 10;
+byte maxX = 127;
+byte minX = 0;
+byte maxY = 63;
+byte minY = 10;
+bool gameRunning = true;
 
 class coords
 {
   public:
-  int X = 0;
-  int Y = 0; 
+  byte X = 0;
+  byte Y = 0; 
 };
 
 typedef struct coords Coords;
 
 struct player
 {
-  int X = 0;
-  int Y = 0;
+  byte X = 0;
+  byte Y = 0;
   char dir = 'R';
-  int Len = 0;
-  static const int MaxLength = 10;
+  int Len = 1;
+  static const int MaxLength = 100;
   Coords *Moves[MaxLength] = {NULL};
 };
 
@@ -39,8 +40,8 @@ int arrayPosition = 0;
 void GenerateFood()
 {
   arduboy.initRandomSeed();
-  foodLocation.X = random(minX, maxX);
-  foodLocation.Y = random(minY, maxY);
+  foodLocation.X = random(minX + 1, maxX - 1);
+  foodLocation.Y = random(minY + 1, maxY - 1);
 }
 
 void StartGame()
@@ -60,7 +61,7 @@ void LogMove()
       p1.Moves[arrayPosition]->X = p1.X;
       p1.Moves[arrayPosition]->Y = p1.Y;
 
-  if(arrayPosition < p1.Len)
+  if(arrayPosition < p1.Len -1)
   {
     arrayPosition += 1;
     
@@ -73,6 +74,7 @@ void LogMove()
 
 void CollisionDetection()
 {
+  // Check if on food
   if(p1.X == foodLocation.X && p1.Y == foodLocation.Y)
   {
     if(p1.Len < p1.MaxLength)
@@ -84,6 +86,15 @@ void CollisionDetection()
     LogMove();
     GenerateFood();
   }
+
+  //Check if hit wall
+
+  if(p1.X >= maxX || p1.X <= minX || p1.Y >= maxY || p1.Y <= minY)
+  {
+    gameRunning = false; 
+  }
+
+  //Check if hit tail
 }
 
 void DrawTail()
@@ -123,7 +134,7 @@ void setup() {
 
   // here we set the framerate to 15, we do not need to run at
   // default 60 and it saves us battery life
-  arduboy.setFrameRate(10);
+  arduboy.setFrameRate(30);
 
  StartGame(); 
 }
@@ -139,73 +150,92 @@ void loop() {
   // first we clear our screen to black
   arduboy.clear();
 
-  DrawFrame();
-
-  CollisionDetection();
-
-  if(arduboy.pressed(RIGHT_BUTTON)) {
-    p1.dir = 'R';
-  }
-
-  if(arduboy.pressed(LEFT_BUTTON)) {
-    p1.dir = 'L';
-  }
-
-  if(arduboy.pressed(UP_BUTTON)) {
-    p1.dir = 'U';
-  }
-
-  if(arduboy.pressed(DOWN_BUTTON)) {
-    p1.dir = 'D';  
-  }
-
-  switch(p1.dir)
+  if(gameRunning == true)
   {
-    case 'U':
-      if(p1.Y > minY)
-      {
-        p1.Y -= 1;
-      }
+    DrawFrame();
+  
+    CollisionDetection();
+  
+    if(arduboy.pressed(RIGHT_BUTTON)) {
+      p1.dir = 'R';
+    }
+  
+    if(arduboy.pressed(LEFT_BUTTON)) {
+      p1.dir = 'L';
+    }
+  
+    if(arduboy.pressed(UP_BUTTON)) {
+      p1.dir = 'U';
+    }
+  
+    if(arduboy.pressed(DOWN_BUTTON)) {
+      p1.dir = 'D';  
+    }
+  
+    switch(p1.dir)
+    {
+      case 'U':
+        if(p1.Y > minY)
+        {
+          p1.Y -= 1;
+        }
+        break;
+      case 'D':
+        if(p1.Y < maxY)
+        {
+          p1.Y += 1;
+        }
+        break;
+      case 'L':
+        if(p1.X > minX)
+        {
+          p1.X-= 1;
+        }
+        break;
+      case 'R':
+        if(p1.X < maxX)
+        {
+          p1.X+= 1;
+        }
+      
       break;
-    case 'D':
-      if(p1.Y < maxY)
-      {
-        p1.Y += 1;
-      }
-      break;
-    case 'L':
-      if(p1.X > minX)
-      {
-        p1.X-= 1;
-      }
-      break;
-    case 'R':
-      if(p1.X < maxX)
-      {
-        p1.X+= 1;
-      }
+    }
+  
+    arduboy.drawPixel(p1.X, p1.Y, 1);
+    arduboy.drawPixel(foodLocation.X, foodLocation.Y, 1);
     
-    break;
+    if(p1.X != previousPosition.X || p1.Y != previousPosition.Y)
+    {
+      previousPosition.X = p1.X;
+      previousPosition.Y = p1.Y;
+      LogMove();
+    }
+    DrawTail();
+    
+    
+    arduboy.setCursor(63, 0);  
+    arduboy.print("Score ");
+  
+    char scoreBuff[5];
+    sprintf(scoreBuff, "%05d", score);
+    
+    arduboy.print(scoreBuff);
   }
-
-  arduboy.drawPixel(p1.X, p1.Y, 1);
-  arduboy.drawPixel(foodLocation.X, foodLocation.Y, 1);
-  DrawTail();
-  if(p1.X != previousPosition.X || p1.Y != previousPosition.Y)
+  else
   {
-    previousPosition.X = p1.X;
-    previousPosition.Y = p1.Y;
-    LogMove();
+    arduboy.setCursor(20, 20);  
+    arduboy.print("Game Over");
+    
+    arduboy.setCursor(20, 40);  
+    arduboy.print("Score ");
+  
+    char scoreBuff[5];
+    sprintf(scoreBuff, "%05d", score);
+    
+    arduboy.print(scoreBuff);
   }
-  
-  
-  arduboy.setCursor(63, 0);  
-  arduboy.print("Score ");
 
-  char scoreBuff[5];
-  sprintf(scoreBuff, "%05d", score);
   
-  arduboy.print(scoreBuff);
   
 
   // then we finaly we tell the arduboy to display what we just wrote to the display
