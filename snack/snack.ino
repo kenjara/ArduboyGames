@@ -9,11 +9,12 @@ byte maxY = 63;
 byte minY = 10;
 bool gameRunning = true;
 
-class coords
+struct coords
 {
   public:
   byte X = 0;
-  byte Y = 0; 
+  byte Y = 0;
+  bool Active = false;
 };
 
 typedef struct coords Coords;
@@ -25,7 +26,8 @@ struct player
   char dir = 'R';
   int Len = 1;
   static const int MaxLength = 100;
-  Coords *Moves[MaxLength] = {NULL};
+  //Coords *Moves[MaxLength] = {NULL};
+  Coords Moves[MaxLength];
 };
 
 typedef struct player Player;
@@ -33,6 +35,7 @@ typedef struct player Player;
 Player p1;
 Coords foodLocation;
 Coords previousPosition;
+
 
 int score = 0;
 int arrayPosition = 0;
@@ -49,17 +52,27 @@ void StartGame()
   p1.X = maxX / 2;
   p1.Y = (maxY / 2) + 10;
   GenerateFood();
+  score = 0;
+  arrayPosition = 0;
+  p1.Len = 1;
+  for (int i=0; i < p1.MaxLength; i++){
+    p1.Moves[i].Active = false;
+  }
+
+  
+  gameRunning = true;
 }
 
 void LogMove()
 {
-  if(p1.Moves[arrayPosition] == NULL)
+  p1.Moves[arrayPosition].Y = p1.Y;
+
+  if(p1.Moves[arrayPosition].Active == false)
   {
-      p1.Moves[arrayPosition] = new Coords();
-    
+      p1.Moves[arrayPosition].Active = true;    
   }
-      p1.Moves[arrayPosition]->X = p1.X;
-      p1.Moves[arrayPosition]->Y = p1.Y;
+      p1.Moves[arrayPosition].X = p1.X;
+      p1.Moves[arrayPosition].Y = p1.Y;
 
   if(arrayPosition < p1.Len -1)
   {
@@ -84,9 +97,10 @@ void CollisionDetection()
 
   //Check if hit tail
   for (int i=0; i < p1.MaxLength; i++){
-      if(p1.Moves[i] != NULL)
-      {
-        if(p1.Moves[i]->X == p1.X && p1.Moves[i]->Y == p1.Y)
+
+        if(p1.Moves[i].Active == true)
+        {
+        if(p1.Moves[i].X == p1.X && p1.Moves[i].Y == p1.Y)
         {
           gameRunning = false;
         }
@@ -111,14 +125,15 @@ void DrawTail()
 {
   int tailPosition = arrayPosition;
   for (int i=0; i < p1.Len; i++){
-      if(p1.Moves[tailPosition] != NULL)
+      if(p1.Moves[tailPosition].Active == true)
       {
-         arduboy.drawPixel(p1.Moves[tailPosition]->X, p1.Moves[tailPosition]->Y, 1);
+         arduboy.drawPixel(p1.Moves[tailPosition].X, p1.Moves[tailPosition].Y, 1);
       }
       else
       {
         return;
       }
+
 
       if(tailPosition > 0)
       {
@@ -254,6 +269,12 @@ void loop() {
     sprintf(scoreBuff, "%05d", score);
     
     arduboy.print(scoreBuff);
+
+    // if the up button or B button is pressed move 1 pixel up every frame
+    if(arduboy.pressed(A_BUTTON) || arduboy.pressed(B_BUTTON)) {
+      StartGame();
+    }
+
   }
 
   
