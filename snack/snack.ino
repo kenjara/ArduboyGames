@@ -85,6 +85,16 @@ void LogMove()
   }
 }
 
+void EndGame()
+{
+    arduboy.tunes.tone(200, 200);
+    delay(400);
+    arduboy.tunes.tone(100, 400);
+    delay(600);
+    arduboy.tunes.tone(50, 2000);
+    gameRunning = false;
+}
+
 void CollisionDetection()
 {
 
@@ -92,7 +102,7 @@ void CollisionDetection()
 
   if(p1.X >= maxX || p1.X <= minX || p1.Y >= maxY || p1.Y <= minY)
   {
-    gameRunning = false; 
+    EndGame();
   }
 
   //Check if hit tail
@@ -102,7 +112,7 @@ void CollisionDetection()
         {
         if(p1.Moves[i].X == p1.X && p1.Moves[i].Y == p1.Y)
         {
-          gameRunning = false;
+          EndGame();
         }
       }
   }
@@ -114,7 +124,7 @@ void CollisionDetection()
     {
       p1.Len += 1;
     }
-    
+    arduboy.tunes.tone(987, 160);
     score += 1;
     LogMove();
     GenerateFood();
