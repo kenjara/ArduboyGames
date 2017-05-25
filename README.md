@@ -1,6 +1,10 @@
 # ArduboyGames
 A place for my Arduboy projects
 
-Current games
+## Current games
 
-Snack - Snake clone. Basic functionality is there but still WIP.
+### Snack
+
+![](https://kenjaraskits.files.wordpress.com/2017/05/snack.gif)
+
+Snake clone. Game is fully playable with more enhancements to come WIP.
