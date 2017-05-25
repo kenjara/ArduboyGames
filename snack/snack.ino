@@ -7,7 +7,8 @@ byte maxX = 127;
 byte minX = 0;
 byte maxY = 63;
 byte minY = 10;
-bool gameRunning = true;
+char gameState = 'T';
+bool sound = false;
 
 struct coords
 {
@@ -60,7 +61,7 @@ void StartGame()
   }
 
   
-  gameRunning = true;
+  gameState = 'G';
 }
 
 void LogMove()
@@ -87,12 +88,16 @@ void LogMove()
 
 void EndGame()
 {
+  if(sound == true)
+  {
     arduboy.tunes.tone(200, 200);
     delay(400);
     arduboy.tunes.tone(100, 400);
     delay(600);
     arduboy.tunes.tone(50, 2000);
-    gameRunning = false;
+  }
+    
+  gameState = 'E';
 }
 
 void CollisionDetection()
@@ -124,7 +129,11 @@ void CollisionDetection()
     {
       p1.Len += 1;
     }
-    arduboy.tunes.tone(987, 160);
+    if(sound == true)
+    {
+      arduboy.tunes.tone(987, 160);
+    }
+    
     score += 1;
     LogMove();
     GenerateFood();
@@ -170,8 +179,6 @@ void setup() {
   // here we set the framerate to 15, we do not need to run at
   // default 60 and it saves us battery life
   arduboy.setFrameRate(30);
-
- StartGame(); 
 }
 
 
@@ -185,8 +192,9 @@ void loop() {
   // first we clear our screen to black
   arduboy.clear();
 
-  if(gameRunning == true)
+  if(gameState == 'G')
   {
+    arduboy.setFrameRate(30);
     DrawFrame();
   
     if(arduboy.pressed(RIGHT_BUTTON)) {
@@ -267,8 +275,9 @@ void loop() {
     
     arduboy.print(scoreBuff);
   }
-  else
+  else if(gameState == 'E')
   {
+    arduboy.setFrameRate(10);
     arduboy.setCursor(20, 20);  
     arduboy.print("Game Over");
     
@@ -280,11 +289,49 @@ void loop() {
     
     arduboy.print(scoreBuff);
 
-    // if the up button or B button is pressed move 1 pixel up every frame
+    if(arduboy.pressed(A_BUTTON) || arduboy.pressed(B_BUTTON)) {
+      gameState = 'T';
+    }
+
+  }
+  else if(gameState == 'T')
+  {
+    arduboy.setFrameRate(10);
+    arduboy.setCursor(50, 1);  
+    arduboy.print("Snack");
+
+    arduboy.setCursor(20, 15);  
+    arduboy.print("By Shane Powell");
+    
+    arduboy.setCursor(50, 55);  
+    arduboy.print("Sound");
+
+    arduboy.setCursor(90, 55);  
+    arduboy.print("On");
+
+    arduboy.setCursor(109, 55);  
+    arduboy.print("Off");
+   
     if(arduboy.pressed(A_BUTTON) || arduboy.pressed(B_BUTTON)) {
       StartGame();
     }
+    else if(arduboy.pressed(LEFT_BUTTON))
+    {
+      sound = true;
+    }
+    else if(arduboy.pressed(RIGHT_BUTTON))
+    {
+      sound = false;
+    }
 
+    if(sound == true)
+    {
+          arduboy.drawRect(88,53, 18, 11, WHITE);
+    }
+    else
+    {
+          arduboy.drawRect(107,53, 21, 11, WHITE);
+    }
   }
 
   
