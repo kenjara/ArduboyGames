@@ -5,6 +5,6 @@ A place for my Arduboy projects
 
 ### Snack
 
-![](https://kenjaraskits.files.wordpress.com/2017/05/snack.gif)
+![](https://kenjaraskits.files.wordpress.com/2017/05/snack2.gif)
 
 Snake clone. Game is fully playable with more enhancements to come WIP.
