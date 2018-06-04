@@ -3,7 +3,12 @@
 // make an instance of arduboy used for many functions
 Arduboy arduboy;
 
-PROGMEM const unsigned char ship1 [] = {0x18, 0x3C, 0x7E, 0xFF, 0x81, 0xC3};
+PROGMEM const unsigned char playerShip [] = {0x10, 0x38, 0x7C, 0xFE};
+
+byte playerWidth = 7;
+byte playerHeight = 4;
+
+PROGMEM const unsigned char ship1 [] = {0x38, 0x7C, 0xFE, 0xFE, 0x82, 0xC6};
 
 byte maxX = 127;
 byte minX = 0;
@@ -39,7 +44,7 @@ int arrayPosition = 0;
 void StartGame()
 {
   p1.X = maxX / 2;
-  p1.Y = (maxY / 2) + 10;
+  p1.Y = maxY - playerHeight;
   score = 0;
   
   gameState = 'G';
@@ -66,7 +71,9 @@ void CollisionDetection()
 
 void DrawFrame()
 {
-  arduboy.drawRect(minX,minY, maxX +1, (maxY - minY) +1, WHITE);
+  //arduboy.drawRect(minX,minY, maxX +1, (maxY - minY) +1, WHITE);
+
+  arduboy.drawSlowXYBitmap(p1.X -2,p1.Y, playerShip, playerWidth, playerHeight, WHITE);
 }
 
 // This function runs once in your game.
@@ -93,21 +100,15 @@ void loop() {
 
   if(gameState == 'G')
   {
-    arduboy.setFrameRate(30);
+    arduboy.setFrameRate(60);
     DrawFrame();
   
     if(arduboy.pressed(RIGHT_BUTTON)) {
-//      if(p1.dir != 'L')
-//      {
-//        p1.dir = 'R';
-//      }
+      p1.X += 1;
     }
   
     if(arduboy.pressed(LEFT_BUTTON)) {
-//      if(p1.dir != 'R')
-//      {
-//        p1.dir = 'L';
-//      }
+      p1.X -= 1;
     }
   
     if(arduboy.pressed(UP_BUTTON)) {
@@ -124,39 +125,37 @@ void loop() {
 //      } 
     }
   
-    switch(p1.dir)
-    {
-      case 'U':
-        if(p1.Y > minY)
-        {
-          p1.Y -= 1;
-        }
-        break;
-      case 'D':
-        if(p1.Y < maxY)
-        {
-          p1.Y += 1;
-        }
-        break;
-      case 'L':
-        if(p1.X > minX)
-        {
-          p1.X-= 1;
-        }
-        break;
-      case 'R':
-        if(p1.X < maxX)
-        {
-          p1.X+= 1;
-        }
-      
-      break;
-    }
+//    switch(p1.dir)
+//    {
+//      case 'U':
+//        if(p1.Y > minY)
+//        {
+//          p1.Y -= 1;
+//        }
+//        break;
+//      case 'D':
+//        if(p1.Y < maxY)
+//        {
+//          p1.Y += 1;
+//        }
+//        break;
+//      case 'L':
+//        if(p1.X > minX)
+//        {
+//          p1.X-= 1;
+//        }
+//        break;
+//      case 'R':
+//        if(p1.X < maxX)
+//        {
+//          p1.X+= 1;
+//        }
+//      
+//      break;
+//    }
 
     CollisionDetection();
-  
-    arduboy.drawPixel(p1.X, p1.Y, 1);  
-    
+      
     arduboy.setCursor(63, 0);  
     arduboy.print("Score ");
   
@@ -186,49 +185,48 @@ void loop() {
   }
   else if(gameState == 'T')
   {
-//    arduboy.setFrameRate(10);
-//    arduboy.setCursor(50, 1);  
-//    arduboy.print("Space");
-//
-//    arduboy.setCursor(20, 15);  
-//    arduboy.print("By Shane Powell");
-//    
-//    arduboy.setCursor(50, 55);  
-//    arduboy.print("Sound");
-//
-//    arduboy.setCursor(90, 55);  
-//    arduboy.print("On");
-//
-//    arduboy.setCursor(109, 55);  
-//    arduboy.print("Off");
+    arduboy.setFrameRate(10);
+    arduboy.setCursor(50, 1);  
+    arduboy.print("Space");
+
+    arduboy.setCursor(20, 15);  
+    arduboy.print("By Shane Powell");
+    
+    arduboy.setCursor(50, 55);  
+    arduboy.print("Sound");
+
+    arduboy.setCursor(90, 55);  
+    arduboy.print("On");
+
+    arduboy.setCursor(109, 55);  
+    arduboy.print("Off");
 
     arduboy.drawSlowXYBitmap(5,5, ship1, 8 , 6, WHITE);
    
-//    if(arduboy.pressed(A_BUTTON) || arduboy.pressed(B_BUTTON)) {
-//      StartGame();
-//    }
-//    else if(arduboy.pressed(LEFT_BUTTON))
-//    {
-//      sound = true;
-//    }
-//    else if(arduboy.pressed(RIGHT_BUTTON))
-//    {
-//      sound = false;
-//    }
-//
-//    if(sound == true)
-//    {
-//          arduboy.drawRect(88,53, 18, 11, WHITE);
-//    }
-//    else
-//    {
-//          arduboy.drawRect(107,53, 21, 11, WHITE);
-//    }
+    if(arduboy.pressed(A_BUTTON) || arduboy.pressed(B_BUTTON)) {
+      StartGame();
+    }
+    else if(arduboy.pressed(LEFT_BUTTON))
+    {
+      sound = true;
+    }
+    else if(arduboy.pressed(RIGHT_BUTTON))
+    {
+      sound = false;
+    }
+
+    if(sound == true)
+    {
+          arduboy.drawRect(88,53, 18, 11, WHITE);
+    }
+    else
+    {
+          arduboy.drawRect(107,53, 21, 11, WHITE);
+    }
   }
 
   
   
 
-  // then we finaly we tell the arduboy to display what we just wrote to the display
   arduboy.display();
 }
