@@ -74,14 +74,14 @@ void DrawFrame()
   
   for (int i = 0; i < maxProjs; i++) 
   {
-    Serial.print("\nproj ");
-    Serial.print(i);
-    Serial.print("\nActive ");
-    Serial.print(projs[i].Active);
-    Serial.print("\nX ");
-    Serial.print(projs[i].X);
-    Serial.print("\nY ");
-    Serial.print(projs[i].Y);
+//    Serial.print("\nproj ");
+//    Serial.print(i);
+//    Serial.print("\nActive ");
+//    Serial.print(projs[i].Active);
+//    Serial.print("\nX ");
+//    Serial.print(projs[i].X);
+//    Serial.print("\nY ");
+//    Serial.print(projs[i].Y);
       if(projs[i].Active == true)
       {
         projs[i].Y -= 1;
@@ -94,8 +94,8 @@ void DrawFrame()
           arduboy.drawPixel(projs[i].X, projs[i].Y, WHITE);       
         }
       }
-      Serial.print("\nActive ");
-      Serial.print(projs[i].Active);
+//      Serial.print("\nActive ");
+//      Serial.print(projs[i].Active);
   }
 
   arduboy.drawSlowXYBitmap(p1.X,p1.Y, playerShip, p1.W, p1.H, WHITE);
