@@ -5,8 +5,8 @@ Arduboy arduboy;
 
 PROGMEM const unsigned char playerShip [] = {0x10, 0x38, 0x7C, 0xFE};
 
-byte playerWidth = 7;
-byte playerHeight = 4;
+//byte playerWidth = 7;
+//byte playerHeight = 4;
 
 PROGMEM const unsigned char ship1 [] = {0x38, 0x7C, 0xFE, 0xFE, 0x82, 0xC6};
 
@@ -17,34 +17,39 @@ byte minY = 10;
 char gameState = 'T';
 bool sound = false;
 
-struct coords
+const byte maxProjs = 3;
+byte fireDelay = 0;
+
+
+struct Proj
 {
-  public:
+  //public:
   byte X = 0;
   byte Y = 0;
   bool Active = false;
 };
 
-typedef struct coords Coords;
-
 struct player
 {
   byte X = 0;
   byte Y = 0;
-    char dir = '-';
+  byte W = 7;
+  byte H = 4;
 };
 
 typedef struct player Player;
 
 Player p1;
 
+Proj projs[maxProjs];
+
 int score = 0;
 int arrayPosition = 0;
 
 void StartGame()
 {
-  p1.X = maxX / 2;
-  p1.Y = maxY - playerHeight;
+  p1.X = (maxX / 2) - (p1.W / 2);
+  p1.Y = maxY - p1.H;
   score = 0;
   
   gameState = 'G';
@@ -72,8 +77,37 @@ void CollisionDetection()
 void DrawFrame()
 {
   //arduboy.drawRect(minX,minY, maxX +1, (maxY - minY) +1, WHITE);
+  
+  for (int i = 0; i < maxProjs; i++) 
+  {
+    Serial.print("\nproj ");
+    Serial.print(i);
+    Serial.print("\nActive ");
+    Serial.print(projs[i].Active);
+    Serial.print("\nX ");
+    Serial.print(projs[i].X);
+    Serial.print("\nY ");
+    Serial.print(projs[i].Y);
+      if(projs[i].Active == true)
+      {
+        projs[i].Y -= 1;
+        if(projs[i].Y == 0)
+        {
+          projs[i].Active = false;
+        }
+        else
+        {
+          arduboy.drawPixel(projs[i].X, projs[i].Y, WHITE);       
+        }
+      }
+      Serial.print("\nActive ");
+      Serial.print(projs[i].Active);
+  }
 
-  arduboy.drawSlowXYBitmap(p1.X -2,p1.Y, playerShip, playerWidth, playerHeight, WHITE);
+  arduboy.drawSlowXYBitmap(p1.X,p1.Y, playerShip, p1.W, p1.H, WHITE);
+  arduboy.drawSlowXYBitmap(5,5, ship1, 8 , 6, WHITE);
+
+  
 }
 
 // This function runs once in your game.
@@ -104,55 +138,39 @@ void loop() {
     DrawFrame();
   
     if(arduboy.pressed(RIGHT_BUTTON)) {
-      p1.X += 1;
+      if((p1.X) < (maxX - p1.W))
+      {
+        p1.X += 1;
+      }
     }
   
     if(arduboy.pressed(LEFT_BUTTON)) {
-      p1.X -= 1;
+      if(p1.X > 0)
+      {
+        p1.X -= 1;
+      }
+    }
+
+    if(arduboy.pressed(B_BUTTON))
+    {
+      if(fireDelay == 0)
+      {
+        for (int i = 0; i < maxProjs; i++) 
+        {
+          if(projs[i].Active == false)
+          {
+            projs[i].X = p1.X + (p1.W /2);
+            projs[i].Y = p1.Y - 1;
+            projs[i].Active = true;
+            fireDelay = 20;
+            break;
+          }
+        }
+      }
     }
   
-    if(arduboy.pressed(UP_BUTTON)) {
-//      if(p1.dir != 'D')
-//      {
-//        p1.dir = 'U';
-//      }
-    }
   
-    if(arduboy.pressed(DOWN_BUTTON)) {
-//      if(p1.dir != 'U')
-//      {
-//        p1.dir = 'D'; 
-//      } 
-    }
-  
-//    switch(p1.dir)
-//    {
-//      case 'U':
-//        if(p1.Y > minY)
-//        {
-//          p1.Y -= 1;
-//        }
-//        break;
-//      case 'D':
-//        if(p1.Y < maxY)
-//        {
-//          p1.Y += 1;
-//        }
-//        break;
-//      case 'L':
-//        if(p1.X > minX)
-//        {
-//          p1.X-= 1;
-//        }
-//        break;
-//      case 'R':
-//        if(p1.X < maxX)
-//        {
-//          p1.X+= 1;
-//        }
-//      
-//      break;
-//    }
+
 
     CollisionDetection();
       
@@ -163,6 +181,11 @@ void loop() {
     sprintf(scoreBuff, "%05d", score);
     
     arduboy.print(scoreBuff);
+
+    if(fireDelay > 0)
+    {
+      fireDelay --;
+    }
   }
   else if(gameState == 'E')
   {
@@ -200,8 +223,6 @@ void loop() {
 
     arduboy.setCursor(109, 55);  
     arduboy.print("Off");
-
-    arduboy.drawSlowXYBitmap(5,5, ship1, 8 , 6, WHITE);
    
     if(arduboy.pressed(A_BUTTON) || arduboy.pressed(B_BUTTON)) {
       StartGame();
