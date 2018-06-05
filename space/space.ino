@@ -1,14 +1,8 @@
 #include "Arduboy.h"
+#include "bitmaps.h"
 
 // make an instance of arduboy used for many functions
 Arduboy arduboy;
-
-PROGMEM const unsigned char playerShip [] = {0x10, 0x38, 0x7C, 0xFE};
-
-//byte playerWidth = 7;
-//byte playerHeight = 4;
-
-PROGMEM const unsigned char ship1 [] = {0x38, 0x7C, 0xFE, 0xFE, 0x82, 0xC6};
 
 byte maxX = 127;
 byte minX = 0;
