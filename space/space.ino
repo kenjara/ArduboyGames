@@ -12,8 +12,21 @@ char gameState = 'T';
 bool sound = false;
 
 const byte maxProjs = 3;
+const byte maxEnemies = 10;
 byte fireDelay = 0;
+byte movementCounter = 0;
+byte movementSpeed = 5;
 
+struct Enemy
+{
+  byte X = 0;
+  byte Y = 0;
+  byte W = 0;
+  byte H = 0;
+  byte moveDelay = 60;
+  bool Active = false;
+  char Dir = 'R';
+};
 
 struct Proj
 {
@@ -36,6 +49,7 @@ typedef struct player Player;
 Player p1;
 
 Proj projs[maxProjs];
+Enemy enemies[maxEnemies];
 
 int score = 0;
 int arrayPosition = 0;
@@ -45,6 +59,8 @@ void StartGame()
   p1.X = (maxX / 2) - (p1.W / 2);
   p1.Y = maxY - p1.H;
   score = 0;
+
+  addEnemy(5, 5, 8, 6, 'R');
   
   gameState = 'G';
 }
@@ -97,11 +113,88 @@ void DrawFrame()
 //      Serial.print("\nActive ");
 //      Serial.print(projs[i].Active);
   }
+  
+      for (int i = 0; i < maxEnemies; i++)
+      {
+          if(enemies[i].Active == true)
+          {
+            for (int i = 0; i < maxProjs; i++) 
+            {
+              if(projs[i].Active == true)
+              {
+                if(projs[i].X >= enemies[i].X && (projs[i].X <= (enemies[i].X + enemies[i].W)) && projs[i].Y >= enemies[i].Y && (projs[i].Y <= (enemies[i].Y + enemies[i].H)))
+                {
+                  projs[i].Active = false;
+                  enemies[i].Active = false;
+                  Serial.print("Hit");
+                  continue;
+                }
+              }
+            }
+            
+            if(movementCounter == movementSpeed)
+            {
+              switch(enemies[i].Dir)
+              {
+                case 'L':
+                if(enemies[i].X > 0)
+                {
+                  enemies[i].X --;
+                }
+                else
+                {
+                  enemies[i].Y ++;
+                  enemies[i].Dir = 'R';
+                }
+                break;
+                case 'R':
+                if(enemies[i].X < maxX - enemies[i].W)
+                {
+                  enemies[i].X ++;
+                }
+                else
+                {
+                  enemies[i].Y ++;
+                  enemies[i].Dir = 'L';
+                }
+                break;      
+              }
+            }
+
+              arduboy.drawSlowXYBitmap(enemies[i].X,enemies[i].Y, ship1, 8 , 6, WHITE);
+          }
+      }
+  
+
 
   arduboy.drawSlowXYBitmap(p1.X,p1.Y, playerShip, p1.W, p1.H, WHITE);
-  arduboy.drawSlowXYBitmap(5,5, ship1, 8 , 6, WHITE);
+  if(movementCounter < movementSpeed)
+  {
+      movementCounter ++;
+  }
+  else
+  {
+    movementCounter = 0;
+  }
 
   
+}
+
+void addEnemy(byte x, byte y, byte w, byte h, char dir)
+{
+  for (int i = 0; i < maxEnemies; i++)
+      {
+          if(enemies[i].Active == false)
+          {
+            enemies[i].X = x;
+            enemies[i].Y = y;
+            enemies[i].H = h;
+            enemies[i].W = w;
+            enemies[i].Dir = dir;
+            enemies[i].Active = true;
+            return;
+          }
+      }
 }
 
 // This function runs once in your game.
@@ -168,13 +261,13 @@ void loop() {
 
     CollisionDetection();
       
-    arduboy.setCursor(63, 0);  
-    arduboy.print("Score ");
-  
-    char scoreBuff[5];
-    sprintf(scoreBuff, "%05d", score);
-    
-    arduboy.print(scoreBuff);
+//    arduboy.setCursor(63, 0);  
+//    arduboy.print("Score ");
+//  
+//    char scoreBuff[5];
+//    sprintf(scoreBuff, "%05d", score);
+//    
+//    arduboy.print(scoreBuff);
 
     if(fireDelay > 0)
     {
