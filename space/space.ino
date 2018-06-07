@@ -15,7 +15,7 @@ const byte maxProjs = 3;
 const byte maxEnemies = 10;
 byte fireDelay = 0;
 byte movementCounter = 0;
-byte movementSpeed = 5;
+byte movementSpeed = 20;
 
 struct Enemy
 {
@@ -26,11 +26,11 @@ struct Enemy
   byte moveDelay = 60;
   bool Active = false;
   char Dir = 'R';
+  byte ExFrames = 0;
 };
 
 struct Proj
 {
-  //public:
   byte X = 0;
   byte Y = 0;
   bool Active = false;
@@ -59,7 +59,6 @@ void StartGame()
   p1.X = (maxX / 2) - (p1.W / 2);
   p1.Y = maxY - p1.H;
   score = 0;
-
   addEnemy(5, 5, 8, 6, 'R');
   
   gameState = 'G';
@@ -90,14 +89,6 @@ void DrawFrame()
   
   for (int i = 0; i < maxProjs; i++) 
   {
-//    Serial.print("\nproj ");
-//    Serial.print(i);
-//    Serial.print("\nActive ");
-//    Serial.print(projs[i].Active);
-//    Serial.print("\nX ");
-//    Serial.print(projs[i].X);
-//    Serial.print("\nY ");
-//    Serial.print(projs[i].Y);
       if(projs[i].Active == true)
       {
         projs[i].Y -= 1;
@@ -113,11 +104,12 @@ void DrawFrame()
 //      Serial.print("\nActive ");
 //      Serial.print(projs[i].Active);
   }
-  
+      bool enemiesActive = false;
       for (int i = 0; i < maxEnemies; i++)
       {
           if(enemies[i].Active == true)
           {
+            enemiesActive = true;
             for (int i = 0; i < maxProjs; i++) 
             {
               if(projs[i].Active == true)
@@ -126,6 +118,7 @@ void DrawFrame()
                 {
                   projs[i].Active = false;
                   enemies[i].Active = false;
+                  enemies[i].ExFrames = 40;
                   Serial.print("Hit");
                   continue;
                 }
@@ -161,16 +154,32 @@ void DrawFrame()
               }
             }
 
-              arduboy.drawSlowXYBitmap(enemies[i].X,enemies[i].Y, ship1, 8 , 6, WHITE);
+            arduboy.drawSlowXYBitmap(enemies[i].X,enemies[i].Y, ship1, 8 , 6, WHITE);
+             
+                
+              }
+              if(enemies[i].ExFrames > 0)
+              {
+                enemiesActive = true;
+                arduboy.drawSlowXYBitmap(enemies[i].X,enemies[i].Y, ex1, 8 , 6, WHITE);
+                Serial.print("draw explosion");
+                enemies[i].ExFrames --;
+              }
           }
-      }
+
+  if(enemiesActive == false)
+  {
+    gameState = 'T';
+  }
   
-
-
   arduboy.drawSlowXYBitmap(p1.X,p1.Y, playerShip, p1.W, p1.H, WHITE);
   if(movementCounter < movementSpeed)
   {
       movementCounter ++;
+      if(sound)
+      {
+        //arduboy.tunes.tone(800, 10);
+      }
   }
   else
   {
@@ -250,6 +259,10 @@ void loop() {
             projs[i].Y = p1.Y - 1;
             projs[i].Active = true;
             fireDelay = 20;
+            if(sound)
+            {
+              arduboy.tunes.tone(500, 100);
+            }
             break;
           }
         }
