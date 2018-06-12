@@ -15,7 +15,7 @@ const byte maxProjs = 3;
 const byte maxEnemies = 10;
 byte fireDelay = 0;
 byte movementCounter = 0;
-byte movementSpeed = 20;
+byte movementSpeed = 10;
 
 struct Enemy
 {
@@ -59,7 +59,10 @@ void StartGame()
   p1.X = (maxX / 2) - (p1.W / 2);
   p1.Y = maxY - p1.H;
   score = 0;
-  addEnemy(5, 5, 8, 6, 'R');
+  for(int i = 5; i <= (maxX - 8);i+=10)
+  {
+      addEnemy(i, 5, 8, 6, 'R');
+  }
   
   gameState = 'G';
 }
@@ -110,16 +113,16 @@ void DrawFrame()
           if(enemies[i].Active == true)
           {
             enemiesActive = true;
-            for (int i = 0; i < maxProjs; i++) 
+            for (int p = 0; p < maxProjs; p++) 
             {
-              if(projs[i].Active == true)
+              if(projs[p].Active == true)
               {
-                if(projs[i].X >= enemies[i].X && (projs[i].X <= (enemies[i].X + enemies[i].W)) && projs[i].Y >= enemies[i].Y && (projs[i].Y <= (enemies[i].Y + enemies[i].H)))
+                if(projs[p].X >= enemies[i].X && (projs[p].X <= (enemies[i].X + enemies[i].W)) && projs[p].Y >= enemies[i].Y && (projs[p].Y <= (enemies[i].Y + enemies[i].H)))
                 {
                   projs[i].Active = false;
                   enemies[i].Active = false;
                   enemies[i].ExFrames = 40;
-                  Serial.print("Hit");
+                  Serial.print("\nHit");
                   continue;
                 }
               }
@@ -136,7 +139,7 @@ void DrawFrame()
                 }
                 else
                 {
-                  enemies[i].Y ++;
+                  enemies[i].Y += 10;
                   enemies[i].Dir = 'R';
                 }
                 break;
@@ -147,7 +150,7 @@ void DrawFrame()
                 }
                 else
                 {
-                  enemies[i].Y ++;
+                  enemies[i].Y += 10;
                   enemies[i].Dir = 'L';
                 }
                 break;      
@@ -155,14 +158,18 @@ void DrawFrame()
             }
 
             arduboy.drawSlowXYBitmap(enemies[i].X,enemies[i].Y, ship1, 8 , 6, WHITE);
-             
+            randomSeed(analogRead(5));
+            int shouldFireResult = random(1, 10);
+            if(shouldFireResult == 1)
+            {
+              //Fire if free projectiles
+            }
                 
               }
               if(enemies[i].ExFrames > 0)
               {
                 enemiesActive = true;
                 arduboy.drawSlowXYBitmap(enemies[i].X,enemies[i].Y, ex1, 8 , 6, WHITE);
-                Serial.print("draw explosion");
                 enemies[i].ExFrames --;
               }
           }
@@ -201,6 +208,8 @@ void addEnemy(byte x, byte y, byte w, byte h, char dir)
             enemies[i].W = w;
             enemies[i].Dir = dir;
             enemies[i].Active = true;
+            Serial.print("\nAdded Enemy: ");
+            Serial.print(i);
             return;
           }
       }
